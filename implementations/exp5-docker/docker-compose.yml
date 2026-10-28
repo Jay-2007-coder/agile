@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  # ============================================================
+  # Main Flask Application
+  # ============================================================
+  bookstore-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: online-book-store
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - FLASK_APP=app.py
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - bookstore-network
+
+  # ============================================================
+  # Nginx Reverse Proxy (optional, for production simulation)
+  # ============================================================
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: bookstore-nginx
+  #   ports:
+  #     - "80:80"
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/nginx.conf
+  #   depends_on:
+  #     - bookstore-app
+  #   networks:
+  #     - bookstore-network
+
+networks:
+  bookstore-network:
+    driver: bridge
+
+volumes:
+  bookstore-data:
